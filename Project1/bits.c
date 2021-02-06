@@ -1,8 +1,8 @@
-/* 
- * CS:APP Data Lab 
- * 
+/*
+ * CS:APP Data Lab
+ *
  * <Please put your name and userid here>
- * 
+ *
  * bits.c - Source file with your solutions to the Lab.
  *          This is the file you will hand in to your instructor.
  *
@@ -10,7 +10,7 @@
  * compiler. You can still use printf for debugging without including
  * <stdio.h>, although you might get a compiler warning. In general,
  * it's not good practice to ignore compiler warnings, but in this
- * case it's OK.  
+ * case it's OK.
  */
 
 #if 0
@@ -24,11 +24,11 @@ You will provide your solution to the Data Lab by
 editing the collection of functions in this source file.
 
 INTEGER CODING RULES:
- 
+
   Replace the "return" statement in each function with one
-  or more lines of C code that implements the function. Your code 
+  or more lines of C code that implements the function. Your code
   must conform to the following style:
- 
+
   /* brief description of how your implementation works */
   int Funct(arg1, arg2, ...) {
       int var1 = Expr1;
@@ -47,7 +47,7 @@ INTEGER CODING RULES:
   2. Function arguments and local variables (no global variables).
   3. Unary integer operations ! ~
   4. Binary integer operations & ^ | + << >>
-    
+
   Some of the problems restrict the set of allowed operators even further.
   Each "Expr" may consist of multiple operators. You are not restricted to
   one operator per line.
@@ -62,7 +62,7 @@ INTEGER CODING RULES:
   7. Use any data type other than int.  This implies that you
      cannot use arrays, structs, or unions.
 
- 
+
   You may assume that your machine:
   1. Uses 2s complement, 32-bit representations of integers.
   2. Performs right shifts arithmetically.
@@ -82,7 +82,7 @@ EXAMPLES OF ACCEPTABLE CODING STYLE:
   /*
    * pow2plus4 - returns 2^x + 4, where 0 <= x <= 31
    *
-   * exploit ability of shifts to compute powers of 2 
+   * exploit ability of shifts to compute powers of 2
    */
   int pow2plus4(int x) {
      int result = (1 << x);
@@ -108,42 +108,42 @@ You are expressly forbidden to:
 
 
 NOTES:
-  1. Use the dlc (data lab checker) compiler (described in the handout) to 
+  1. Use the dlc (data lab checker) compiler (described in the handout) to
      check the legality of your solutions.
   2. Each function has a maximum number of operators (! ~ & ^ | + << >>)
-     that you are allowed to use for your implementation of the function. 
-     The max operator count is checked by dlc. Note that '=' is not 
+     that you are allowed to use for your implementation of the function.
+     The max operator count is checked by dlc. Note that '=' is not
      counted; you may use as many of these as you want without penalty.
   3. Use the btest test harness to check your functions for correctness.
   4. Use the BDD checker to formally verify your functions
   5. The maximum number of ops for each function is given in the
-     header comment for each function. If there are any inconsistencies 
+     header comment for each function. If there are any inconsistencies
      between the maximum ops in the writeup and in this file, consider
      this file the authoritative source.
 
 /*
  * STEP 2: Modify the following functions according the coding rules.
- * 
+ *
  *   IMPORTANT. TO AVOID GRADING SURPRISES:
  *   1. Use the dlc compiler to check that your solutions conform
  *      to the coding rules.
- *   2. Use the BDD checker to formally verify that your solutions produce 
+ *   2. Use the BDD checker to formally verify that your solutions produce
  *      the correct answers.
  */
 
 
 #endif
-/* 
- * bitAnd - x&y using only ~ and | 
+/*
+ * bitAnd - x&y using only ~ and |
  *   Example: bitAnd(6, 5) = 4
  *   Legal ops: ~ |
  *   Max ops: 8
  *   Rating: 1
  */
 int bitAnd(int x, int y) {
-  return ~(~x | ~y);
+   return ~(~x | ~y);
 }
-/* 
+/*
  * getByte - Extract byte n from word x
  *   Bytes numbered from 0 (LSB) to 3 (MSB)
  *   Examples: getByte(0x12345678,1) = 0x56
@@ -152,18 +152,19 @@ int bitAnd(int x, int y) {
  *   Rating: 2
  */
 int getByte(int x, int n) {
-  return (x >> (n << 3)) & 0xff;
+	return (x >> (n << 3)) & 0xff;
+	//return ((x&(0xff<<(n<<3)))>>(n<<3))&0xff;
 }
-/* 
+/*
  * logicalShift - shift x to the right by n, using a logical shift
  *   Can assume that 0 <= n <= 31
  *   Examples: logicalShift(0x87654321,4) = 0x08765432
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 20
- *   Rating: 3 
+ *   Rating: 3
  */
 int logicalShift(int x, int n) {
-  return 2;
+	return (x >> n) & (~(((1 << 31) >> n) << 1));
 }
 /*
  * bitCount - returns count of number of 1's in word
@@ -173,29 +174,38 @@ int logicalShift(int x, int n) {
  *   Rating: 4
  */
 int bitCount(int x) {
-  return 2;
+	int m1=0x11 | (0x11<<8);
+    int mask=m1 | (m1<<16);
+	int s = x&mask;
+	s+=x>>1&mask;
+	s+=x>>2&mask;
+	s+=x>>3&mask;
+	s=s+(s>>16);
+	mask=0xf | (0xf<<8);
+	s=(s&mask)+((s>>4)&mask);//this is the things what the teacher said in class
+	return (s+(s>>8))&0x3f;
 }
-/* 
+/*
  * bang - Compute !x without using !
  *   Examples: bang(3) = 0, bang(0) = 1
  *   Legal ops: ~ & ^ | + << >>
  *   Max ops: 12
- *   Rating: 4 
+ *   Rating: 4
  */
 int bang(int x) {
-  return 2;
+	return (((~x + 1) | x) >> 31) + 1;
 }
-/* 
- * tmin - return minimum two's complement integer 
+/*
+ * tmin - return minimum two's complement integer
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 4
  *   Rating: 1
  */
 int tmin(void) {
-  return 2;
+	return  1 << 31; /*shift the '1' bit to get 0x80000000*/
 }
-/* 
- * fitsBits - return 1 if x can be represented as an 
+/*
+ * fitsBits - return 1 if x can be represented as an
  *  n-bit, two's complement integer.
  *   1 <= n <= 32
  *   Examples: fitsBits(5,3) = 0, fitsBits(-4,3) = 1
@@ -204,9 +214,10 @@ int tmin(void) {
  *   Rating: 2
  */
 int fitsBits(int x, int n) {
-  return 2;
+	n = (x>>(n+~1+1));
+	return !(n)^!(~n);
 }
-/* 
+/*
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
  *  Round toward zero
  *   Examples: divpwr2(15,1) = 7, divpwr2(-33,4) = -2
@@ -215,37 +226,59 @@ int fitsBits(int x, int n) {
  *   Rating: 2
  */
 int divpwr2(int x, int n) {
-    return 2;
+	return (x+(((x>>31)&0x1)<<n)+~((x>>31)&0x1)+0x1)>>n;
 }
-/* 
- * negate - return -x 
+/*
+ * negate - return -x
  *   Example: negate(1) = -1.
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 5
  *   Rating: 2
  */
 int negate(int x) {
-  return 2;
+	//by the definition of two's complement, negation can be done by doing NOT operation and plus 1.
+	int t = ~x;
+	int q = t + 1;
+	return q;
+
 }
-/* 
- * isPositive - return 1 if x > 0, return 0 otherwise 
+/*
+ * isPositive - return 1 if x > 0, return 0 otherwise
  *   Example: isPositive(-1) = 0.
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 8
  *   Rating: 3
  */
 int isPositive(int x) {
-  return 2;
+	//two cases that x is equal or less than 0.
+	int nx = ~x + 1;
+	//1. sign bit is 0 when x is negated.
+	int sign = (nx >> 31) & 1;
+	//2. x is tmin.
+	int check_tmin = !(x ^ (1<<31));
+	return sign ^ check_tmin;
+
 }
-/* 
- * isLessOrEqual - if x <= y  then return 1, else return 0 
+/*
+ * isLessOrEqual - if x <= y  then return 1, else return 0
  *   Example: isLessOrEqual(4,5) = 1.
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 24
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  return 2;
+	//get sign of x and y.
+	int sx = (x>>31) & 1;
+	int sy = (y>>31) & 1;
+	//calculate y-x. don't care about overflow.
+	int y_x = y + (~x + 1);
+	//get sign bit of y-x.
+	int syx = (y_x>>31) & 1;
+	//two cases that x<=y.
+	//1. x is negative and y is positive.
+	//2. both value have same sign bit, and syx indicates positive.
+	int r = (sx & !sy) | (!(sx^sy) & !syx);
+	return r;
 }
 /*
  * ilog2 - return floor(log base 2 of x), where x > 0
@@ -255,9 +288,55 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 4
  */
 int ilog2(int x) {
-  return 2;
+	int exp = 0;
+	int cx = x;
+	//think about left-half 16 bits of entire 32 bit.
+	int rx = x>>16;
+	//qr will be 1 if rx is not 0.
+	int qr = (!!rx);
+	//fill 32 bit with qr's lsb.
+	qr = (qr<<31)>>31;
+	//if qr is 0xffffffff, then there is at least one bit with value 1 in left-half bits.
+	//otherwise, there is no bit with value 1 in left-half bits.
+	//take rx when there is a bit in the left section.
+	//otherwise, not.
+	rx = (qr & rx) | ((~qr) & cx);
+	//add 16 when rx is non-zero.
+	//then, right-half is useless, because ilog2 value will be larger or equal than 16.
+	exp = exp + ((qr & 16) | (~qr & 0));
+	//do the same thing with 16 bits.
+	//get left-half 8 bits, and so on...
+	cx = rx;
+	rx = rx>>8;
+	qr = (!!rx);
+	qr = (qr<<31)>>31;
+	rx = (qr & rx) | (~qr & cx);
+	exp = exp + ((qr & 8) | (~qr & 0));
+	//get left-half 4 bits, ...
+	cx = rx;
+	rx = rx>>4;
+	qr = (!!rx);
+	qr = (qr<<31)>>31;
+	rx = (qr & rx) | (~qr & cx);
+	exp = exp + ((qr & 4) | (~qr & 0));
+	//get left-half 2 bits, ....
+	cx = rx;
+	rx = rx>>2;
+	qr = (!!rx);
+	qr = (qr<<31)>>31;
+	rx = (qr & rx) | (~qr & cx);
+	exp = exp + ((qr & 2) | (~qr & 0));
+	//get the left bit in 2 bits, ....
+	cx = rx;
+	rx = rx>>1;
+	qr = (!!rx);
+	qr = (qr<<31)>>31;
+	rx = (qr & rx>>1) | (~qr & cx);
+	exp = exp + ((qr & 1) | (~qr & 0));
+	//finally, exp will be the answer.
+	return exp;
 }
-/* 
+/*
  * float_neg - Return bit-level equivalent of expression -f for
  *   floating point argument f.
  *   Both the argument and result are passed as unsigned int's, but
@@ -269,9 +348,15 @@ int ilog2(int x) {
  *   Rating: 2
  */
 unsigned float_neg(unsigned uf) {
- return 2;
+	//change sign bit of the value. that's all.
+	unsigned nonnan = (0x80000000 ^ uf);
+	//check "Exp" bits.
+	unsigned curry = 0xff << 23;
+	//if "Exp" bits are filled with 1 and "Frac" bits have at least one bit, it is NaN.
+	if(((curry & uf) == curry) && (uf & ((1<<23) + (~0)))) return uf;
+	return nonnan;
 }
-/* 
+/*
  * float_i2f - Return bit-level equivalent of expression (float) x
  *   Result is returned as unsigned int, but
  *   it is to be interpreted as the bit-level representation of a
@@ -281,9 +366,56 @@ unsigned float_neg(unsigned uf) {
  *   Rating: 4
  */
 unsigned float_i2f(int x) {
-  return 2;
+	int tx = x;
+	unsigned result = 0; //= x & (1<<31);
+	//b will be the sign bit with 31 times left shifted.
+	int b = x&0x80000000;
+	int cc = 0x7f;
+	int qtx;
+	int lastbit;
+	int mask;
+	int f,f1,f2,g,h,i,rr,q,lbx;
+	if(x==0) return 0; //special case 1 : x is 0.
+	if(x == 0x80000000) { //special case 2 : x is tmin. we can't negate this value.
+		return 0xcf000000;
+	}
+	result = result | b; // mark sign bit.
+	if(b) {
+		tx = -x; // let's consider only positive value.
+	}
+	qtx = tx;
+	while(qtx/=2) { // get E value.
+		cc=cc+1;
+	}
+	//cc will be Exp value.
+	lastbit = cc-0x7f; //last bit is E value.
+	mask = (1<<lastbit) - 1;
+	//get other bit under 'lastbit'.
+	q = (mask & tx);
+	lbx = 23-lastbit;
+	if(lastbit<=23) {
+		//less than 24 bits remain, then, M is just q<<lbx.
+		result = result + (q<<lbx);
+	} else {
+		f = -lbx;
+		f1 = f-1;
+		f2 = 1<<f1;
+		g = q & (f2-1);
+		h = q & (1<<(f));
+		i = q & (f2);
+		rr = q >> (f);
+		//rounding.
+		//g : check under (lastbit-25) bit. if g is non-zero, there is a bit under the (lastbit-25) bit.
+		//h : check (lastbit-23) bit. if h is non-zero, even-rounding is possible.
+		//i : check (lastbit-24) bit. it's essential for round-up.
+		rr = rr + (i && (g || h));
+		result = result | rr;
+	}
+	//add Exp bits.
+	result = result + (cc<<23);
+	return result;
 }
-/* 
+/*
  * float_twice - Return bit-level equivalent of expression 2*f for
  *   floating point argument f.
  *   Both the argument and result are passed as unsigned int's, but
@@ -295,5 +427,14 @@ unsigned float_i2f(int x) {
  *   Rating: 4
  */
 unsigned float_twice(unsigned uf) {
-  return 2;
+	//uf = +-0 case.
+	if(uf==0 || uf == 0x80000000) return uf;
+	//NaN case.
+	if(((uf>>23) & 0xff) == 0xff) return uf;
+	//Tiny value, but non-zero case.
+	if(((uf>>23) & 0xff) == 0x00) {
+		return (uf & (1<<31)) | (uf<<1);
+	}
+	//Otherwise, Add 1 to exp value.
+	return uf + (1<<23);
 }
